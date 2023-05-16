@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+   function isLoggedIn() {
+    return request.auth != null && 
+        request.auth.uid != null && 
+        request.auth.uid != '';
+   }
+    
+   function resourceIsOwnedByUser() {
+    	return isLoggedIn() &&
+        	(
+          	resource.data.user == request.auth.uid // edited by the same user
+          )
+    }
+    
+    match /{somePath=**}/chat/{document} {
+    	allow read;
+      allow list: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if resourceIsOwnedByUser();
+      allow delete: if resourceIsOwnedByUser();
+    }
+    
+    match /{document=**} {
+      allow read: if isLoggedIn();
+      allow list: if isLoggedIn();
+      allow create: if isLoggedIn();
+      allow update: if resourceIsOwnedByUser();
+      allow delete: if resourceIsOwnedByUser();
+    }
+    
+    match /user/{user} {
+    	allow read;
+      allow create: if isLoggedIn();
+      allow update: if user == request.auth.uid || isSuperEditor();
+      allow delete: if user == request.auth.uid || isSuperEditor();
+    }
+  }
+}
