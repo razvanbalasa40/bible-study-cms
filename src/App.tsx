@@ -58,14 +58,17 @@ type BlogPost = {
   metaDescription: string;
   relatedPosts: EntityReference[];
 
+  postedOn: Date;
+  lastUpdated: Date;
+
   topImage: string;
-  boldContent: string;
   content: string;
 };
 
 type BlogPostParagraph = {
   title: string;
   content: string;
+  order: number;
   subparagraphs: {
     title: string;
     content: string;
@@ -115,6 +118,11 @@ const blogPostsParagraphs = buildCollection<BlogPostParagraph>({
       markdown: true,
       validation: { required: true },
       dataType: 'string',
+    },
+    order: {
+      name: 'Order',
+      validation: { required: true },
+      dataType: 'number',
     },
     subparagraphs: {
       name: 'Subparagraphs',
@@ -192,7 +200,6 @@ const blogPostsCollection = buildCollection<BlogPost>({
     },
     tags: {
       name: 'Tags',
-      validation: { required: true },
       dataType: 'array',
       of: {
         dataType: 'string',
@@ -210,22 +217,31 @@ const blogPostsCollection = buildCollection<BlogPost>({
       name: 'Top image',
       dataType: 'string',
       storage: {
-        storagePath: 'images',
+        storagePath: 'blog-posts/images',
         acceptedFiles: ['image/*'],
+        fileName: (context) => {
+          return context.file.name;
+        },
       },
     }),
-    boldContent: {
-      name: 'Bolded content',
-      markdown: true,
-      validation: { required: true },
-      dataType: 'string',
-    },
     content: {
       name: 'Content',
       markdown: true,
       validation: { required: true },
       dataType: 'string',
     },
+    postedOn: buildProperty({
+      name: 'Posted on',
+      dataType: 'date',
+      autoValue: 'on_create',
+      validation: { required: true },
+    }),
+    lastUpdated: buildProperty({
+      name: 'Updated on',
+      dataType: 'date',
+      autoValue: 'on_update',
+      validation: { required: true },
+    }),
   },
 });
 
@@ -245,7 +261,7 @@ export default function App() {
 
   return (
     <FirebaseCMSApp
-      name={'My Online Shop'}
+      name={'Bible chat CMS'}
       authentication={myAuthenticator}
       collections={[blogPostsCollection]}
       firebaseConfig={firebaseConfig}
