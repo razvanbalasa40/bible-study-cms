@@ -75,6 +75,22 @@ type BlogPostParagraph = {
   }[];
 };
 
+type Chat = {
+  user: string;
+  timestamp: Date;
+  name: string;
+  type: string;
+  prompt: string;
+  last_message: string;
+  ended: boolean;
+};
+
+type Message = {
+  role: string;
+  content: string;
+  timestamp: Date;
+};
+
 // const localeCollection = buildCollection({
 //     path: "locale",
 //     customId: locales,
@@ -102,6 +118,74 @@ type BlogPostParagraph = {
 //         }
 //     }
 // });
+
+const messages = buildCollection<Message>({
+  name: 'Messages',
+  singularName: 'Message',
+  path: 'message',
+  properties: {
+    role: {
+      name: 'Role',
+      validation: { required: true },
+      dataType: 'string',
+    },
+    content: {
+      name: 'Content',
+      validation: { required: true },
+      dataType: 'string',
+    },
+    timestamp: buildProperty({
+      name: 'Timestamp',
+      dataType: 'date',
+      validation: { required: true },
+    }),
+  },
+});
+
+const chats = buildCollection<Chat>({
+  name: 'Chats',
+  singularName: 'Chat',
+  path: 'suggestion/com.basmo.BibleChat/chat',
+  icon: 'Chat',
+  properties: {
+    user: {
+      name: 'User',
+      validation: { required: true },
+      dataType: 'string',
+    },
+    timestamp: buildProperty({
+      name: 'Timestamp',
+      dataType: 'date',
+      validation: { required: true },
+    }),
+    name: {
+      name: 'Name',
+      validation: { required: true },
+      dataType: 'string',
+    },
+    type: {
+      name: 'Type',
+      validation: { required: true },
+      dataType: 'string',
+    },
+    prompt: {
+      name: 'Prompt',
+      validation: { required: true },
+      dataType: 'string',
+    },
+    last_message: {
+      name: 'Last Message',
+      validation: { required: true },
+      dataType: 'string',
+    },
+    ended: {
+      name: 'Ended',
+      validation: { required: true },
+      dataType: 'boolean',
+    },
+  },
+  subcollections: [messages],
+});
 
 const blogPostsParagraphs = buildCollection<BlogPostParagraph>({
   name: 'Paragraphs',
@@ -263,7 +347,7 @@ export default function App() {
     <FirebaseCMSApp
       name={'Bible chat CMS'}
       authentication={myAuthenticator}
-      collections={[blogPostsCollection]}
+      collections={[blogPostsCollection, chats]}
       firebaseConfig={firebaseConfig}
     />
   );
